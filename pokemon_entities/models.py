@@ -6,10 +6,19 @@ class Pokemon(models.Model):
     title_en = models.CharField(max_length=200)
     title_jp = models.CharField(max_length=200)
     description = models.TextField()
+    evolution = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     image = models.ImageField(upload_to='images/pokemons', null=True)
 
     def __str__(self):
         return self.title_ru
+
+    @property
+    def previous_evolution(self):
+        return self.evolution
+
+    @property
+    def next_evolution(self):
+        return self.children.first()
 
 
 class PokemonEntity(models.Model):

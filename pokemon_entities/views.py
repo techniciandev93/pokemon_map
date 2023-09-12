@@ -27,7 +27,7 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 def add_pokemon_to_map(pokemons):
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in pokemons:
-        pokemon_entity = PokemonEntity.objects.get(pokemon=pokemon)
+        pokemon_entity = get_object_or_404(PokemonEntity, pokemon=pokemon)
         if localtime(pokemon_entity.appeared_at) < localtime() < localtime(pokemon_entity.disappeared_at):
             add_pokemon(folium_map,
                         pokemon_entity.lat,
@@ -40,18 +40,9 @@ def add_pokemon_to_map(pokemons):
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
     folium_map = add_pokemon_to_map(pokemons)
-
-    pokemons_on_page = []
-    for pokemon in pokemons:
-        pokemons_on_page.append({
-            'pokemon_id': pokemon.id,
-            'img_url': pokemon.image.url,
-            'title_ru': pokemon.title_ru,
-        })
-
     return render(request, 'mainpage.html', context={
         'map': folium_map._repr_html_(),
-        'pokemons': pokemons_on_page,
+        'pokemons': pokemons,
     })
 
 
@@ -60,15 +51,6 @@ def show_pokemon(request, pokemon_id):
     pokemons = Pokemon.objects.all()
     folium_map = add_pokemon_to_map(pokemons)
 
-    pokemon_on_page = {
-        "pokemon_id": pokemon.id,
-        "title_ru": pokemon.title_ru,
-        "title_en": pokemon.title_en,
-        "title_jp": pokemon.title_jp,
-        "description": pokemon.description,
-        "img_url": pokemon.image.url
-    }
-
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon_on_page
+        'map': folium_map._repr_html_(), 'pokemon': pokemon
     })
