@@ -1,4 +1,5 @@
 import folium
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import localtime
 from pokemon_entities.models import Pokemon, PokemonEntity
@@ -27,13 +28,16 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 def add_pokemon_to_map(pokemons):
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in pokemons:
-        pokemon_entity = get_object_or_404(PokemonEntity, pokemon=pokemon)
-        if localtime(pokemon_entity.appeared_at) < localtime() < localtime(pokemon_entity.disappeared_at):
-            add_pokemon(folium_map,
-                        pokemon_entity.lat,
-                        pokemon_entity.lon,
-                        pokemon.image.path
-                        )
+        try:
+            pokemon_entity = PokemonEntity.objects.get(pokemon=pokemon)
+            if localtime(pokemon_entity.appeared_at) < localtime() < localtime(pokemon_entity.disappeared_at):
+                add_pokemon(folium_map,
+                            pokemon_entity.lat,
+                            pokemon_entity.lon,
+                            pokemon.image.path
+                            )
+        except ObjectDoesNotExist:
+            continue
     return folium_map
 
 
