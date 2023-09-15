@@ -16,11 +16,11 @@ class Pokemon(models.Model):
 
     @property
     def previous_evolution(self):
-        return self.evolution
+        return self.evolution_pokemon
 
     @property
     def next_evolution(self):
-        return self.children.first()
+        return self.next_evolution_pokemon.first()
 
 
 class PokemonEntity(models.Model):
